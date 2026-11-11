@@ -6,10 +6,18 @@ public class NetworkStart : MonoBehaviour
 {
     private const ushort Port = 7777;
 
+    [SerializeField] private string m_hostAddress = "10.219.32.121";
+
     [ContextMenu("Test HostStart")]
     public void TestHostStart()
     {
         StartHost();
+    }
+
+    [ContextMenu("Test ClientStart")]
+    public void TestClientStart()
+    {
+        StartClient(m_hostAddress);
     }
 
     public void StartHost()
