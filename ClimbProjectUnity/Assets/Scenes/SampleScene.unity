@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 52498475}
   - component: {fileID: 52498474}
   - component: {fileID: 52498476}
+  - component: {fileID: 52498477}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -225,6 +226,18 @@ MonoBehaviour:
     PacketDelayMS: 0
     PacketJitterMS: 0
     PacketDropRate: 0
+--- !u!114 &52498477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 52498473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf0959c5fe400cd4ca2e6d0f92da8d18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkDebug
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -518,7 +531,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80129c374a010c549b03415ed9839f17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkStart
-  m_hostAddress: 10.219.32.121
+  m_hostAddress: 10.219.32.126
 --- !u!4 &1341914274
 Transform:
   m_ObjectHideFlags: 0

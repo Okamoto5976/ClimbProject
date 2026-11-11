@@ -22,6 +22,8 @@ public class NetworkStart : MonoBehaviour
 
     public void StartHost()
     {
+      
+
         UnityTransport transport =
             NetworkManager.Singleton.GetComponent<UnityTransport>();
 
@@ -39,6 +41,20 @@ public class NetworkStart : MonoBehaviour
 
     public void StartClient(string hostAddress)
     {
+        var manager = NetworkManager.Singleton;
+
+        Debug.Log($"IsListening: {manager.IsListening}");
+        Debug.Log($"IsHost: {manager.IsHost}");
+        Debug.Log($"IsClient: {manager.IsClient}");
+        Debug.Log($"IsServer: {manager.IsServer}");
+
+        if (manager.IsListening)
+        {
+            Debug.LogError("すでに通信が開始されています！");
+            return;
+        }
+
+
         UnityTransport transport =
             NetworkManager.Singleton.GetComponent<UnityTransport>();
 
@@ -47,6 +63,8 @@ public class NetworkStart : MonoBehaviour
             Port
             );
 
-        NetworkManager.Singleton.StartClient();
+        bool result = NetworkManager.Singleton.StartClient();
+
+        Debug.Log($"StartClient Result: {result}");
     }
 }
