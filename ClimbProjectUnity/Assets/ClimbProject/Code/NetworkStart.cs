@@ -34,7 +34,11 @@ public class NetworkStart : MonoBehaviour
             "0.0.0.0"
             );
 
-        NetworkManager.Singleton.StartHost();
+        bool result = NetworkManager.Singleton.StartHost();
+
+        Debug.Log($"StartHost Result: {result}");
+        Debug.Log($"IsListening: {NetworkManager.Singleton.IsListening}");
+        Debug.Log($"IsHost: {NetworkManager.Singleton.IsHost}");
     }
 
     //10.219.32.121 HostAddress
