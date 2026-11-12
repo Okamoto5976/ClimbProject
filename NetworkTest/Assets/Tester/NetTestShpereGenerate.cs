@@ -14,7 +14,8 @@ public class NetTestShpereGenerate : MonoBehaviour
 
     private Vector2 moveInput = Vector2.zero;
 
-    private void Start()
+    [ContextMenu("test Generate")]
+    private void TestGenerate()
     {
         for(int i = 0; i < m_count; i++)
         {
