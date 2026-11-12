@@ -82,10 +82,14 @@ public class RelayTestUI : MonoBehaviour
                 NetworkManager.Singleton.GetComponent<UnityTransport>();
 
             transport.SetRelayServerData(
-     AllocationUtils.ToRelayServerData(allocation, "wss")
- );
+               AllocationUtils.ToRelayServerData(allocation, "dtls")
+           );
 
-            transport.UseWebSockets = true;
+            //           transport.SetRelayServerData(
+            //    AllocationUtils.ToRelayServerData(allocation, "wss")
+            //);
+
+            //           transport.UseWebSockets = true;
 
             // HostŠJŽn
             var manager = NetworkManager.Singleton;
@@ -149,10 +153,14 @@ public class RelayTestUI : MonoBehaviour
                 NetworkManager.Singleton.GetComponent<UnityTransport>();
 
             transport.SetRelayServerData(
-    AllocationUtils.ToRelayServerData(allocation, "wss")
-);
+                AllocationUtils.ToRelayServerData(allocation, "dtls")
+            );
 
-            transport.UseWebSockets = true;
+//            transport.SetRelayServerData(
+//    AllocationUtils.ToRelayServerData(allocation, "wss")
+//);
+
+//            transport.UseWebSockets = true;
 
             Debug.Log("[Client] Relay Data Set");
 
