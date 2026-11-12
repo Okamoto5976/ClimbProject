@@ -64,6 +64,9 @@ public class RelayTestUI : MonoBehaviour
 
             await InitializeServices();
 
+            Debug.Log($"[Host] Project ID: {Application.cloudProjectId}");
+            Debug.Log($"[Host] Player ID: {AuthenticationService.Instance.PlayerId}");
+
             // Relayの接続枠を1人分確保
             Allocation allocation =
                 await RelayService.Instance.CreateAllocationAsync(1);
@@ -121,13 +124,23 @@ public class RelayTestUI : MonoBehaviour
             m_isBusy = true;
             m_status = "Joining Host...";
 
+            Debug.Log("[Client] Initialize Services Start");
+
             await InitializeServices();
+
+            Debug.Log("[Client] Initialize Services Complete");
+            Debug.Log($"[Client] Project ID: {Application.cloudProjectId}");
+            Debug.Log($"[Client] Join Code: {m_inputCode.Trim()}");
+
+            Debug.Log("[Client] JoinAllocation Start");
 
             // Join CodeからRelay情報を取得
             JoinAllocation allocation =
                 await RelayService.Instance.JoinAllocationAsync(
                     m_inputCode.Trim()
                 );
+
+            Debug.Log("[Client] JoinAllocation Complete");
 
             // Unity TransportにRelay情報を設定
             UnityTransport transport =
@@ -136,6 +149,8 @@ public class RelayTestUI : MonoBehaviour
             transport.SetRelayServerData(
                 AllocationUtils.ToRelayServerData(allocation, "dtls")
             );
+
+            Debug.Log("[Client] Relay Data Set");
 
             // Client開始
             bool result = NetworkManager.Singleton.StartClient();
@@ -161,15 +176,31 @@ public class RelayTestUI : MonoBehaviour
     // 接続成功イベント
     private void OnClientConnected(ulong clientId)
     {
+        var manager = NetworkManager.Singleton;
+
+        Debug.Log(
+            $"[Connected] ClientID: {clientId}, " +
+            $"LocalClientID: {manager.LocalClientId}, " +
+            $"IsHost: {manager.IsHost}, " +
+            $"IsClient: {manager.IsClient}, " +
+            $"IsServer: {manager.IsServer}"
+        );
+
         m_status = $"Connected! Client ID: {clientId}";
-        Debug.Log(m_status);
     }
 
     // 切断イベント
     private void OnClientDisconnected(ulong clientId)
     {
+        var manager = NetworkManager.Singleton;
+
+        Debug.LogWarning(
+            $"[Disconnected] ClientID: {clientId}, " +
+            $"LocalClientID: {manager.LocalClientId}, " +
+            $"IsListening: {manager.IsListening}"
+        );
+
         m_status = $"Disconnected: Client ID: {clientId}";
-        Debug.LogWarning(m_status);
     }
 
     private void OnGUI()

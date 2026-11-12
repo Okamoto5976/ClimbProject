@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NetworkStart : MonoBehaviour
 {
-    private const ushort Port = 7777;
+    private const ushort Port = 8000;
 
     [SerializeField] private string m_hostAddress = "10.219.32.121";
 
@@ -29,10 +29,11 @@ public class NetworkStart : MonoBehaviour
 
         //Ú‘±‚ğó‚¯•t‚¯‚é
         transport.SetConnectionData(
-            "127.0.0.1",
+            "10.219.32.121",
             Port,
             "0.0.0.0"
             );
+
 
         bool result = NetworkManager.Singleton.StartHost();
 
