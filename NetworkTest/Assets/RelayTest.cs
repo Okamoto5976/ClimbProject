@@ -69,7 +69,7 @@ public class RelayTestUI : MonoBehaviour
 
             // Relay‚ÌÚ‘±˜g‚ğ1l•ªŠm•Û
             Allocation allocation =
-                await RelayService.Instance.CreateAllocationAsync(1);
+                await RelayService.Instance.CreateAllocationAsync(3);
 
             // Join Code‚ğæ“¾
             m_joinCode =
