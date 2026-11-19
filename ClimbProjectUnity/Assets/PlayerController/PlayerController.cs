@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private bool isClimbing=false;
     private bool canClimb=false;
+    private ClimbStart currentClimbStart;
     void Awake()
     {
         rb=GetComponent<Rigidbody>();
@@ -30,35 +31,54 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("ClimbStart"))
         {
             canClimb = true;
+            currentClimbStart=other.GetComponent<ClimbStart>();
         }
         if (other.CompareTag("ClimbTop"))
         {
             isClimbing = false;
             rb.useGravity = true;
+            rb.linearVelocity = Vector3.zero;
 
-            transform.position += transform.forward + Vector3.up;
-        }
+         }
     }
     private void OnTriggerExit(Collider other)
     {
-        if(other.CompareTag("ClimbStart"))
+        if(other.CompareTag("ClimbStart")&&!isClimbing)
         {
             canClimb = false;
+            currentClimbStart = null;
         }
     }
+    private void Update()
+    {
+        if (climbAction.action.triggered && canClimb)
+        {
+            isClimbing = true;
 
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+
+            float wallFront = currentClimbStart.WallCollider.bounds.min.z;
+
+            Vector3 pos = transform.position;
+            pos.z = wallFront - 1f;
+            transform.position = pos;
+
+            Debug.Log("•Ç‚Ì‚Ú‚è" + isClimbing);
+        }
+    }
     private void FixedUpdate()
     {
         Vector2 input = moveAction.action.ReadValue<Vector2>();
 
-        if(climbAction.action.triggered&&canClimb)
-        {
-            isClimbing = !isClimbing;
-            rb.useGravity = !isClimbing;
-            Debug.Log("•Ç‚Ì‚Ú‚è" + isClimbing);
-        }
         if (isClimbing)
         {
+            float wallFront = currentClimbStart.WallCollider.bounds.min.z;
+
+            Vector3 pos = transform.position;
+            pos.z = wallFront - 1f;   
+            transform.position = pos; transform.position = pos;
+
             rb.linearVelocity = new Vector3(
                 input.x * climbSpeed,
                 input.y * climbSpeed,

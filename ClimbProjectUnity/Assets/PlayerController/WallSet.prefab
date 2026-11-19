@@ -210,6 +210,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8174295110000647849}
   - component: {fileID: 1790115958028949966}
+  - component: {fileID: 3897061336419569293}
   m_Layer: 0
   m_Name: ClimpStart
   m_TagString: ClimbStart
@@ -253,6 +254,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 10, y: 1, z: 2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3897061336419569293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8232954425630972500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f0e83a53bd19964b9b9311f7632f0f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClimbStart
+  wallCollider: {fileID: 5854581672148709442}
 --- !u!1 &8368205141051948468
 GameObject:
   m_ObjectHideFlags: 0
