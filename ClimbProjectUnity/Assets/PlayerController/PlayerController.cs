@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private InputActionReference climbAction;
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float climbSpeed = 3f;
+    [SerializeField]private float downClimbSpeed=15f;
     
     private Rigidbody rb;
     private bool isClimbing=false;
@@ -77,11 +78,17 @@ public class PlayerController : MonoBehaviour
 
             Vector3 pos = transform.position;
             pos.z = wallFront - 1f;   
-            transform.position = pos; transform.position = pos;
+            transform.position = pos;
 
+            float verticalSpeed = climbSpeed;
+
+            if(input.y< 0&&Mathf.Abs(input.x)<0.1f)
+            {
+                verticalSpeed=downClimbSpeed;
+            }
             rb.linearVelocity = new Vector3(
                 input.x * climbSpeed,
-                input.y * climbSpeed,
+                input.y * verticalSpeed,
                 0
             );
         }
