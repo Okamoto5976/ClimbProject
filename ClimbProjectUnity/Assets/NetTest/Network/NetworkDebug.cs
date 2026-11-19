@@ -32,3 +32,4 @@ public class NetworkDebug : MonoBehaviour
         Debug.Log($"[Disconnected] ClientID: {clientId}");
     }
 }
+    

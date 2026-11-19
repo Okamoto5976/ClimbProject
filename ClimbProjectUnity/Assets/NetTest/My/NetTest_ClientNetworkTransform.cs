@@ -4,7 +4,7 @@ using Unity.Netcode.Components;
 /// 所有者(オーナー)が位置を決めて同期するNetworkTransform。
 /// 標準のNetworkTransformはサーバー権限のため、クライアントの移動が反映されない。
 /// </summary>
-public class ClientNetworkTransform : NetworkTransform
+public class NetTest_ClientNetworkTransform : NetworkTransform
 {
     protected override bool OnIsServerAuthoritative()
     {

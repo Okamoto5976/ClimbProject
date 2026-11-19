@@ -11,6 +11,7 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 
 using Unity.Networking.Transport.Relay;
+using System.Runtime.CompilerServices;
 //using Unity.Networking.Transport.Relay.AllocationUtils;
 
 public class RelayTestUI : MonoBehaviour
@@ -72,10 +73,7 @@ public class RelayTestUI : MonoBehaviour
                 await RelayService.Instance.CreateAllocationAsync(3);
 
             // Join CodeÇéÊìæ
-            m_joinCode =
-                await RelayService.Instance.GetJoinCodeAsync(
-                    allocation.AllocationId
-                );
+            m_joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
             // Unity TransportÇ…RelayèÓïÒÇê›íË
             UnityTransport transport =
@@ -140,11 +138,8 @@ public class RelayTestUI : MonoBehaviour
 
             Debug.Log("[Client] JoinAllocation Start");
 
-            // Join CodeÇ©ÇÁRelayèÓïÒÇéÊìæ
-            JoinAllocation allocation =
-                await RelayService.Instance.JoinAllocationAsync(
-                    m_inputCode.Trim()
-                );
+
+            JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(m_joinCode);
 
             Debug.Log("[Client] JoinAllocation Complete");
 
@@ -222,8 +217,7 @@ public class RelayTestUI : MonoBehaviour
         GUILayout.Label("Relay Test");
         GUILayout.Space(10);
 
-        GUI.enabled = !m_isBusy &&
-                      !NetworkManager.Singleton.IsListening;
+        GUI.enabled = !m_isBusy && !NetworkManager.Singleton.IsListening;
 
         if (GUILayout.Button("Start Host", GUILayout.Height(40)))
         {
