@@ -46,6 +46,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        CheckClimbStart();
+    }
+
+    private void CheckClimbStart()
+    {
         if (climbAction.action.triggered)
         {
             Vector3 origin = transform.position + Vector3.up * rayHeight;
@@ -57,10 +62,14 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
     private void FixedUpdate()
     {
+        MovePlayer();
+    }
+    private void MovePlayer()
+    {
         Vector3 origin = transform.position + Vector3.up * rayHeight;
+
 
         bool hitWall = Physics.Raycast(
             origin,
@@ -69,18 +78,9 @@ public class PlayerController : MonoBehaviour
             wallCheckDistance,
             wallLayer);
 
-        Vector2 input = moveAction.action.ReadValue<Vector2>();
+        DrawWallRay(origin);
 
-        if (hitWall)
-        {
-            Debug.DrawRay(origin, transform.forward * wallCheckDistance, Color.green);
-        }
-        else
-        {
-            Debug.DrawRay(origin, transform.forward * wallCheckDistance, Color.red);
-        }
-
-        if (isClimbing && !hitWall)
+        if (isClimbing&&!hitWall)
         {
             StartClimbOver();
             return;
@@ -88,31 +88,57 @@ public class PlayerController : MonoBehaviour
 
         if (isClimbing)
         {
-            Vector3 pos = transform.position;
-            pos.z = hit.point.z - wallOffset;
-            transform.position = pos;
-
-            float verticalSpeed = climbSpeed;
-
-            if (input.y < 0 && Mathf.Abs(input.x) < 0.1f)
-            {
-                verticalSpeed = downClimbSpeed;
-            }
-
-            rb.linearVelocity = new Vector3(
-                input.x * climbSpeed,
-                input.y * verticalSpeed,
-                0);
+            ClimbMove(hit);
         }
         else
         {
-            rb.linearVelocity = new Vector3(
-                input.x * moveSpeed,
-                rb.linearVelocity.y,
-                0);
+            GroundMove();
         }
     }
+    private void ClimbMove(RaycastHit hit)
+    {
+        Vector2 input = moveAction.action.ReadValue<Vector2>();
 
+        Vector3 pos = transform.position;
+        pos.z = hit.point.z - wallOffset;
+        transform.position = pos;
+
+        float verticalSpeed = climbSpeed;
+
+        if (input.y < 0 && Mathf.Abs(input.x) < 0.1f)
+        {
+            verticalSpeed = downClimbSpeed;
+        }
+
+        rb.linearVelocity = new Vector3(
+            input.x * climbSpeed,
+            input.y * verticalSpeed,
+            0);
+    }
+    private void GroundMove()
+    {
+        Vector2 input = moveAction.action.ReadValue<Vector2>();
+
+        rb.linearVelocity = new Vector3(
+            input.x * moveSpeed,
+            rb.linearVelocity.y,
+            0);
+    }
+    private void DrawWallRay(Vector3 origin)
+    {
+        Color color = Physics.Raycast(
+            origin,
+            transform.forward,
+            wallCheckDistance,
+            wallLayer)
+            ? Color.green
+            : Color.red;
+
+        Debug.DrawRay(
+            origin,
+            transform.forward * wallCheckDistance,
+            color);
+    }
     private void StartClimb(RaycastHit hit)
     {
         isClimbing = true;
