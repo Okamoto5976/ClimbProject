@@ -10,8 +10,6 @@ using Unity.Services.Authentication;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 
-using Unity.Networking.Transport.Relay;
-using System.Runtime.CompilerServices;
 //using Unity.Networking.Transport.Relay.AllocationUtils;
 
 public class RelayTestUI : MonoBehaviour
@@ -25,22 +23,16 @@ public class RelayTestUI : MonoBehaviour
     private void Start()
     {
         // 接続イベントを登録
-        NetworkManager.Singleton.OnClientConnectedCallback
-            += OnClientConnected;
-
-        NetworkManager.Singleton.OnClientDisconnectCallback
-            += OnClientDisconnected;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
     }
 
     private void OnDestroy()
     {
         if (NetworkManager.Singleton != null)
         {
-            NetworkManager.Singleton.OnClientConnectedCallback
-                -= OnClientConnected;
-
-            NetworkManager.Singleton.OnClientDisconnectCallback
-                -= OnClientDisconnected;
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
         }
     }
 
@@ -69,22 +61,16 @@ public class RelayTestUI : MonoBehaviour
             Debug.Log($"[Host] Player ID: {AuthenticationService.Instance.PlayerId}");
 
             // Relayの接続枠を1人分確保
-            Allocation allocation =
-                await RelayService.Instance.CreateAllocationAsync(3);
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
 
             // Join Codeを取得
             m_joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
             // Unity TransportにRelay情報を設定
-            UnityTransport transport =
-                NetworkManager.Singleton.GetComponent<UnityTransport>();
+            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
 
-            // transport.SetRelayServerData(
-            //    AllocationUtils.ToRelayServerData(allocation, "dtls")
-            //);
-
-            transport.SetRelayServerData(
-     AllocationUtils.ToRelayServerData(allocation, "wss")
+            // transport.SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, "dtls")
+            transport.SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, "wss")
  );
 
             transport.UseWebSockets = true;
@@ -127,6 +113,12 @@ public class RelayTestUI : MonoBehaviour
         {
             m_isBusy = true;
             m_status = "Joining Host...";
+            string joinCode = m_inputCode.Trim();
+            if (string.IsNullOrEmpty(joinCode))
+            {
+                m_status = "Join Codeを入力してください";
+                return;
+            }
 
             Debug.Log("[Client] Initialize Services Start");
 
@@ -139,20 +131,15 @@ public class RelayTestUI : MonoBehaviour
             Debug.Log("[Client] JoinAllocation Start");
 
 
-            JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(m_joinCode);
+            JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
             Debug.Log("[Client] JoinAllocation Complete");
 
             // Unity TransportにRelay情報を設定
-            UnityTransport transport =
-                NetworkManager.Singleton.GetComponent<UnityTransport>();
+            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
 
-            //transport.SetRelayServerData(
-            //    AllocationUtils.ToRelayServerData(allocation, "dtls")
-            //);
-
-            transport.SetRelayServerData(
-    AllocationUtils.ToRelayServerData(allocation, "wss")
+            //transport.SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, "dtls")
+            transport.SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, "wss")
 );
 
             transport.UseWebSockets = true;

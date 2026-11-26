@@ -2,15 +2,15 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
+/// <summary>
+/// 接続したクライアントごとにPlayerを生成し、切断時に片付ける（Server専用）。
+/// </summary>
 public class NetTest_NetworkPlayerSpawner : NetworkBehaviour
 {
-    [SerializeField]
-    private GameObject _playerPrefab;
+    [SerializeField] private GameObject _playerPrefab;
+    [SerializeField] private float _spawnInterval = 2f;
 
-    [SerializeField]
-    private float _spawnInterval = 2f;
-
-    private Dictionary<ulong, NetworkObject> _players = new();
+    private readonly Dictionary<ulong, NetworkObject> _players = new();
 
     public override void OnNetworkSpawn()
     {
@@ -30,8 +30,13 @@ public class NetTest_NetworkPlayerSpawner : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        NetworkManager.OnClientConnectedCallback -= OnClientConnected;
-        NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
+        if (NetworkManager != null)
+        {
+            NetworkManager.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
+        }
+
+        _players.Clear();
     }
 
     private void OnClientConnected(ulong clientId)
@@ -41,21 +46,24 @@ public class NetTest_NetworkPlayerSpawner : NetworkBehaviour
 
     private void OnClientDisconnected(ulong clientId)
     {
-        if (!_players.TryGetValue(clientId, out NetworkObject player))
-            return;
+        if (!_players.Remove(clientId, out NetworkObject player)) return;
 
+        // Netcode側で既に破棄されている場合があるためnull判定する
         if (player != null && player.IsSpawned)
         {
             player.Despawn(true);
         }
-
-        _players.Remove(clientId);
     }
 
     private void SpawnPlayer(ulong clientId)
     {
-        if (_players.ContainsKey(clientId))
-            return;
+        if (!IsServer) return;
+        // すでにPlayerObjectが存在する場合は生成しない
+        if (NetworkManager.ConnectedClients.TryGetValue(clientId, out var client))
+        {
+            if (client.PlayerObject != null)return;
+        }
+        if (_players.ContainsKey(clientId)) return;
 
         Vector3 spawnPosition = new Vector3(clientId * _spawnInterval, 0f, 0f);
 

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6478332974854838308}
   - component: {fileID: -4129710786205169700}
   - component: {fileID: 1843139642403807630}
+  - component: {fileID: -6656723880608172373}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -121,7 +122,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   ShowTopMostFoldoutHeaderGroup: 1
-  m_moveSpeed: 5
+  _moveSpeed: 5
+--- !u!114 &-6656723880608172373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4386793325851946530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed1c8f6b93aebed45b878b5756b715f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetTest_RenderTarget
+  ShowTopMostFoldoutHeaderGroup: 1
+  _pauseBehaviours: []
+  _showIndicator: 1
+  _useOwnerColor: 1
+  _indicatorColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &4816193134453953381
 GameObject:
   m_ObjectHideFlags: 0

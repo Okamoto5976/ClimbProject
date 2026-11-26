@@ -2,104 +2,222 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
+/// <summary>
+/// 動くオブジェクトの生成・モード切替・移動更新を管理する。
+/// Host(Server)専用。
+/// </summary>
 public class NetTest_NetworkMovingObjectManager : NetworkBehaviour
 {
-    [SerializeField] private GameObject _movingObjectPrefab;
-    [SerializeField] private float _moveSpeed = 3f;
-    [SerializeField] private float _radius = 3f;
+    [Header("Prefab")]
+    [SerializeField]
+    private GameObject _movingObjectPrefab;
 
-    private List<NetworkObject> _objects = new();
+    [Header("Move Settings")]
+    [SerializeField]
+    private float _moveSpeed = 3f;
 
-    private Enum_MovingMode _currentMode;
+    [Header("Random Move Settings")]
+    [SerializeField]
+    private float _moveInterval = 2f;
+
+    private readonly List<NetTest_MovingMotion> _motions = new();
+
+    private Enum_MovingMode _currentMode =
+        Enum_MovingMode.FollowHost;
+
+    private bool _isDirty;
+
+    public float MoveSpeed => _moveSpeed;
+
+    public float MoveInterval => _moveInterval;
 
     public override void OnNetworkSpawn()
     {
+        enabled = IsServer;
+
         if (!IsServer) return;
 
-        CreateObjects(Enum_MovingMode.FollowHost);
+        NetworkManager.OnClientConnectedCallback
+            += OnClientListChanged;
+
+        NetworkManager.OnClientDisconnectCallback
+            += OnClientListChanged;
+
+        ApplyMode(_currentMode);
     }
 
-    // 動作モードを変更
-    public void CreateObjects(Enum_MovingMode mode)
+    public override void OnNetworkDespawn()
     {
         if (!IsServer) return;
 
-        ClearObjects();
-
-        _currentMode = mode;
-
-        switch (mode)
+        if (NetworkManager != null)
         {
-            case Enum_MovingMode.FollowHost:
-                CreateObject(mode, NetworkManager.ServerClientId);
-                break;
+            NetworkManager.OnClientConnectedCallback
+                -= OnClientListChanged;
 
-            case Enum_MovingMode.FollowClients:
-                foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
-                {
-                    CreateObject(mode, clientId);
-                }
-                break;
+            NetworkManager.OnClientDisconnectCallback
+                -= OnClientListChanged;
+        }
 
-            case Enum_MovingMode.Clockwise:
-                CreateObject(mode, 0);
-                break;
+        _motions.Clear();
+    }
 
-            case Enum_MovingMode.FollowInOrder:
-                CreateObject(mode, 0);
-                break;
+    private void Update()
+    {
+        if (_isDirty)
+        {
+            _isDirty = false;
+
+            ApplyMode(_currentMode);
+        }
+
+        float deltaTime = Time.deltaTime;
+
+        for (int i = 0; i < _motions.Count; i++)
+        {
+            _motions[i].Tick(deltaTime);
         }
     }
 
-    private void CreateObject(Enum_MovingMode mode, ulong targetClientId)
+    /// <summary>
+    /// 移動モードを変更
+    /// </summary>
+    public void SetMode(Enum_MovingMode mode)
     {
-        GameObject obj = Instantiate(_movingObjectPrefab, Vector3.zero, Quaternion.identity);
+        if (!IsServer) return;
 
-        NetTest_ServerDrivenObject controller = obj.GetComponent<NetTest_ServerDrivenObject>();
-
-        controller.Initialize(mode, targetClientId, _moveSpeed, _radius);
-
-        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
-
-        // Host所有のNetworkObjectとして生成
-        networkObject.Spawn();
-
-        _objects.Add(networkObject);
+        ApplyMode(mode);
     }
 
-    private void ClearObjects()
-    {
-        foreach (var obj in _objects)
-        {
-            if (obj != null && obj.IsSpawned)
-            {
-                obj.Despawn(true);
-            }
-        }
-
-        _objects.Clear();
-    }
-
+    /// <summary>
+    /// 移動速度を変更
+    /// </summary>
     public void SetMoveSpeed(float value)
     {
         if (!IsServer) return;
 
         _moveSpeed = value;
 
-        CreateObjects(_currentMode);
+        for (int i = 0; i < _motions.Count; i++)
+        {
+            _motions[i].SetMoveSpeed(value);
+        }
     }
 
-    public void SetRadius(float value)
+    /// <summary>
+    /// 移動方向の変更間隔を変更
+    /// </summary>
+    public void SetMoveInterval(float value)
     {
         if (!IsServer) return;
 
-        _radius = value;
+        _moveInterval = Mathf.Max(0.01f, value);
 
-        CreateObjects(_currentMode);
+        for (int i = 0; i < _motions.Count; i++)
+        {
+            _motions[i].SetMoveInterval(_moveInterval);
+        }
     }
 
-    public void SetMode(Enum_MovingMode mode)
+    /// <summary>
+    /// Clientの接続・切断時
+    /// </summary>
+    private void OnClientListChanged(ulong clientId)
     {
-        CreateObjects(mode);
+        if (_currentMode == Enum_MovingMode.FollowClients)
+        {
+            _isDirty = true;
+        }
+    }
+
+    /// <summary>
+    /// 移動モードを適用する
+    /// </summary>
+    private void ApplyMode(Enum_MovingMode mode)
+    {
+        _currentMode = mode;
+
+        IReadOnlyList<ulong> clientIds =
+            NetworkManager.ConnectedClientsIds;
+
+        int required =
+            mode == Enum_MovingMode.FollowClients
+            ? clientIds.Count
+            : 1;
+
+        while (_motions.Count < required)
+        {
+            SpawnMotion();
+        }
+
+        while (_motions.Count > required)
+        {
+            DespawnLastMotion();
+        }
+
+        for (int i = 0; i < _motions.Count; i++)
+        {
+            ulong targetId = mode switch
+            {
+                Enum_MovingMode.FollowHost =>
+                    NetworkManager.ServerClientId,
+
+                Enum_MovingMode.FollowClients =>
+                    clientIds[i],
+
+                _ => 0UL
+            };
+
+            _motions[i].Setup(
+                mode,
+                targetId,
+                _moveSpeed,
+                _moveInterval
+            );
+        }
+    }
+
+    /// <summary>
+    /// 敵を生成する
+    /// </summary>
+    private void SpawnMotion()
+    {
+        GameObject obj = Instantiate(
+            _movingObjectPrefab,
+            Vector3.zero,
+            Quaternion.identity
+        );
+
+        NetworkObject networkObject =
+            obj.GetComponent<NetworkObject>();
+
+        // Host所有のNetworkObjectとして生成
+        networkObject.Spawn();
+
+        _motions.Add(
+            new NetTest_MovingMotion(
+                NetworkManager,
+                networkObject
+            )
+        );
+    }
+
+    /// <summary>
+    /// 最後の敵を削除する
+    /// </summary>
+    private void DespawnLastMotion()
+    {
+        int last = _motions.Count - 1;
+
+        NetworkObject networkObject =
+            _motions[last].NetworkObject;
+
+        _motions.RemoveAt(last);
+
+        if (networkObject != null &&
+            networkObject.IsSpawned)
+        {
+            networkObject.Despawn(true);
+        }
     }
 }

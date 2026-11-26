@@ -1,7 +1,6 @@
 public enum Enum_MovingMode
 {
-    FollowHost, 
+    FollowHost,
     FollowClients, 
-    Clockwise, 
-    FollowInOrder
+    RandomMove
 }

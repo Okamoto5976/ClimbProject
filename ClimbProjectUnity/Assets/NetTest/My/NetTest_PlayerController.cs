@@ -1,53 +1,35 @@
 using Unity.Netcode;
 using UnityEngine;
 
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
-
+/// <summary>
+/// 自分(Owner)のPlayerだけを移動させる。
+/// </summary>
 public class NetTtest_PlayerController : NetworkBehaviour
 {
     [SerializeField]
     private float _moveSpeed = 5f;
 
-    private void Update()
+    public override void OnNetworkSpawn()
     {
-        // 自分のPlayer以外は操作できない
-        if (!IsOwner) return;
-
-        Vector2 input = ReadInput();
-
-        Vector3 move = new Vector3(input.x, 0f, input.y);
-
-        if (move.sqrMagnitude > 1f) move.Normalize();
-
-        transform.position += move * _moveSpeed * Time.deltaTime;
+        enabled = IsOwner;
     }
 
-    private Vector2 ReadInput()
+    public override void OnGainedOwnership()
     {
-        Vector2 v = Vector2.zero;
+        enabled = true;
+    }
 
-#if ENABLE_INPUT_SYSTEM
+    public override void OnLostOwnership()
+    {
+        enabled = false;
+    }
 
-        var kb = Keyboard.current;
+    private void Update()
+    {
+        Vector2 input = NetTest_PlayerInput.ReadMove();
+        if (input == Vector2.zero) return;
 
-        if (kb == null) return v;
-
-        if (kb.wKey.isPressed) v.y += 1f;
-        if (kb.sKey.isPressed) v.y -= 1f;
-        if (kb.dKey.isPressed) v.x += 1f;
-        if (kb.aKey.isPressed) v.x -= 1f;
-
-#else
-
-        if (Input.GetKey(KeyCode.W)) v.y += 1f;
-        if (Input.GetKey(KeyCode.S)) v.y -= 1f;
-        if (Input.GetKey(KeyCode.D)) v.x += 1f;
-        if (Input.GetKey(KeyCode.A)) v.x -= 1f;
-
-#endif
-
-        return v;
+        Vector3 move = new Vector3(input.x, input.y, 0f);
+        transform.position += move * (_moveSpeed * Time.deltaTime);
     }
 }

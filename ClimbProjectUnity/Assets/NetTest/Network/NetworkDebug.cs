@@ -24,12 +24,17 @@ public class NetworkDebug : MonoBehaviour
 
     private void OnConnected(ulong clientId)
     {
-        Debug.Log($"[Connected] ClientID: {clientId}");
+        Debug.Log($"[Connected] ClientID: {clientId}", this);
     }
 
     private void OnDisconnected(ulong clientId)
     {
-        Debug.Log($"[Disconnected] ClientID: {clientId}");
+        string reason = m_networkManager.DisconnectReason;
+        if(string.IsNullOrEmpty(reason))
+        {
+            reason = "(理由なし：タイムアウト　or 接続ができなかった可能性)";
+        }
+        Debug.Log($"[Disconnected] ClientID: {clientId} Reason: {reason}", this);
     }
 }
     
