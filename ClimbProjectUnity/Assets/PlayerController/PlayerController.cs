@@ -23,9 +23,11 @@ public class PlayerController : MonoBehaviour
     [Header("Ray Height")]
     [SerializeField] private float rayHeight = 1.5f;
     [SerializeField] private Animator animator;
+    [SerializeField] private PlayerAttack playerAttack;
 
     private Rigidbody rb;
     private bool isClimbing = false;
+    public bool IsClimbing => isClimbing;
 
     private void Awake()
     {
@@ -49,6 +51,10 @@ public class PlayerController : MonoBehaviour
         CheckClimbStart();
     }
 
+    private void FixedUpdate()
+    {
+        MovePlayer();
+    }
     private void CheckClimbStart()
     {
         if (climbAction.action.triggered)
@@ -61,10 +67,6 @@ public class PlayerController : MonoBehaviour
                 StartClimb(hit);
             }
         }
-    }
-    private void FixedUpdate()
-    {
-        MovePlayer();
     }
     private void MovePlayer()
     {
@@ -118,7 +120,7 @@ public class PlayerController : MonoBehaviour
     private void GroundMove()
     {
         Vector2 input = moveAction.action.ReadValue<Vector2>();
-
+        
         rb.linearVelocity = new Vector3(
             input.x * moveSpeed,
             rb.linearVelocity.y,
